@@ -68,7 +68,7 @@ Git 是一个分布式版本控制系统。你可以把它想象成一个极其�
 
 ![alt text](./img/image-5.png)
 
-在上面输入 git init 并回车就可以完成初始化之后会有一个 .git 文件(没有的话可能被隐藏了，可以设置一下)，接下来就可以方便的使用git提交并管理代码了
+在上面输入 `git init` 并回车就可以完成初始化之后会有一个 .git 文件(没有的话可能被隐藏了，可以设置一下)，接下来就可以方便的使用git提交并管理代码了
 
 ![alt text](./img/image-1.png)
 
@@ -84,10 +84,13 @@ Git 是一个分布式版本控制系统。你可以把它想象成一个极其�
 在图上类似git@github.com:yourname/yourregistory.git的为仓库的地址
 
 ![alt text](./img/image-6.png)
-接下来我们在终端git add 文件，可以使用 git status 来查看文件状态
+接下来我们在终端`git add` 文件，可以使用 `git status` 来查看文件状态
 
-![alt text](./img/image-7.png)  
-再使用git commit (-m 参数可以添加一些备注)和 git push (. 代表push全部)来提交代码    
+![alt text](./img/image-8.png)  
+再使用`git commit (-m 参数可以添加一些备注)`
+
+![alt text](./img/image-9.png)
+上面`git branch`查看本地分支，再`git push [远程分支] [本地分支]`推送上去
 
 ![alt text](./img/deb06c686e6902b8e2057bb7998f8b82.png)
 
