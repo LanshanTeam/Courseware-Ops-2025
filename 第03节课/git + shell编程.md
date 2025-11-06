@@ -90,7 +90,10 @@ Git 是一个分布式版本控制系统。你可以把它想象成一个极其�
 再使用`git commit (-m 参数可以添加一些备注)`
 
 ![alt text](./img/image-9.png)
-上面`git branch`查看本地分支，再`git push [远程分支] [本地分支]`推送上去
+上面`git branch`查看本地分支，再`git push [远程分支] [本地分支]`推送上去  
+
+![alt text](./img/image-10.png)  
+然后就可以在我们的远程仓库里看到推送的文件  
 
 ![alt text](./img/deb06c686e6902b8e2057bb7998f8b82.png)
 
