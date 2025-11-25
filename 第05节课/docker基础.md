@@ -10,7 +10,7 @@
 
 ### 什么是Docker
 
-![](docker基础.assets/屏幕截图 2025-11-25 165019.png)
+![](docker基础.assets/picture3.png)
 
 Docker 是一种开源的应用容器引擎，能够让开发者打包他们的应用程序以及依赖包到一个轻量级、可移植的容器中。它利用了 Linux 内核特性来创建独立的工作环境。容器完全使用**沙盒机制**，相互之间不会存在任何接口。几乎没有性能开销，可以很容易的在机器和数据中心运行。Docker使开发、测试、部署变得更加高效，解决了“在我的机器上可以运行但是换台机器就无法实现”的问题，实现跨环境的一致性。
 
@@ -383,7 +383,7 @@ docker volume inspect [数据卷名字] #查看数据卷信息
 docker volume rm [name] #删除volume
 ```
 
-![](docker基础.assets/屏幕截图_22-11-2025_20132_ecs-workbench.aliyun.com.jpeg)
+![](docker基础.assets/picture4.jpeg)
 
 ### 如何使用数据卷
 
@@ -395,13 +395,13 @@ docker run -it -v 主机目录:容器目录 /bin/bash
 
 在容器的/home文件夹下写入的任何文件都会同步到主机的/home/ceshi文件夹下，删除操作也是同步的。双向绑定，保证两边文件夹下的数据始终是一致的。
 
-![](docker基础.assets/屏幕截图 2025-11-23 205439.png)
+![](docker基础.assets/picture1.png)
 
 如上图所示，我在容器里创建了一个test目录，退出容器后发现主机也出现了同样的test目录。
 
 当我在主机的test目录下新建一个test01.txt文件并写入hello！时，再次进入容器就会发现之前的test空目录下也出现了这个.txt文件，并且里面写入了同样的内容：
 
-![](docker基础.assets/屏幕截图 2025-11-23 211720.png)
+![](docker基础.assets/picture2.png)
 
 ## Dockerfile
 
@@ -488,11 +488,11 @@ docker build -t centos . #其中 . 表示当前目录作为构建上下文
 
 构建成功的截图是这样的：
 
-![](docker基础.assets/屏幕截图_23-11-2025_212612_ecs-workbench-disposable.aliyun.com.jpeg)
+![](docker基础.assets/picture5.jpeg)
 
 我们用docker images检查一下：
 
-![](docker基础.assets/屏幕截图_23-11-2025_212756_ecs-workbench-disposable.aliyun.com.jpeg)
+![](docker基础.assets/picture6.jpeg)
 
 这里就说明我们的镜像构建成功了。
 
