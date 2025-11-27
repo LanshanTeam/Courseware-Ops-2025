@@ -24,18 +24,18 @@ Compose 项目由 Python 编写，实现上调用了 Docker 服务提供的 API 
 
 因为linux上下载好docker之后，默认是没有安装docker compose的，需要我们自己安装
 
+
 # 安装步骤：
 
 ```shell
- # 下载docker-compose二进制文件 并且 移到可执行目录下
- sudo curl -L
-  "https://get.daocloud.io.docker-compose/releases/download/1.27.4.docker-compose- $$(uname -s)-$ $(uname -m)" -o /usr/local/bin/docker-compose
+# 下载docker-compose二进制文件
+sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
- # 赋予可执行权限
- sudo chmod +x /usr/local/bin.docker-compose
+# 赋予可执行权限
+sudo chmod +x /usr/local/bin/docker-compose
 
- # 查看版本
- docker-compose -v
+# 查看版本
+docker-compose -v
 
 ```
 
@@ -43,7 +43,7 @@ Compose 项目由 Python 编写，实现上调用了 Docker 服务提供的 API 
 
 ```shell
  #下载docker-compose  
- wget https://github.com.docker/compose/releases/download/v2.16.0/docker-compose-linux-x86_64  
+ wget https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-linux-x86_64  
  #移动到可执行的路径  
  mv docker-compose-linux-x86_64 /usr/local/bin/docker-compose  
  #赋予执行权限  
@@ -53,6 +53,9 @@ Compose 项目由 Python 编写，实现上调用了 Docker 服务提供的 API 
  #删除docker-compose  
  rm -f /usr/local/bin/docker-compose
 ```
+
+都不行可以参考 [下载](https://blog.csdn.net/m0_73866100/article/details/146464094?fromshare=blogdetail&sharetype=blogdetail&sharerId=146464094&sharerefer=PC&sharesource=RemSiesta&sharefrom=from_link)
+
 
 # 卸载
 
@@ -1069,22 +1072,24 @@ networks:
 
 level0
 
-熟悉讲的内容，并使用docker-compose部署一个服务（可以上网找一些开源的服务来部署，也可以是上面的实战内容）。（截图访问界面；如果是用云服务器部署的，也可以提交访问地址）
+了解课上讲的内容，理解docker compose 和docker swarm的应用场景和为什么需要这种技术，把环境给配好，比如下载好docker compose ，初始化一个swarm集群。
 
 level1
 
-搭建一个swarm集群。提交docker node ls 截图
+使用docker compose部署一个项目(可以是网上找的，自己写的，也可以是课上的实践)。
 
 level2
 
-使用swarm集群部署一个服务。(可以是网上找的开源服务，也可以是上面的wordpress实战内容，要求提交docker-compose文件截图以浏览器访问的截图)
+使用swarm集群部署一个服务(这里可以试试在虚拟机上面实现，毕竟集群的多节点还是太贵了，如果购买服务器的话。然后部署的项目也可以是任何的地方来的)。
 
 level3
 
-在level2的基础上，修改服务为多个副本，实现负载均衡(小tips：可以在docker-compose中再加一个nginx来实现，nginx的配置文件需要使用config来挂载)。提交nginx的配置文件（如果使用nginx实现的）+ docker-compose文件。
+在level2 和level3 的基础上，按你的想法来修改服务，可以是多个副本实现负载均衡等，把你理解到的输出出来。
 
-level4
+level4  
 
-了解k8s，k8s是下学期的重点之一。有基础的同学，可以直接使用k8s来实现level3的效果。另外，也抽空复习linux、python等之前上的内容。
+如果你已经掌握了以上的部署，你可以继续了解kubernetes(k8s)部署，这也是一个解决容器编排的强大技术，学有余力试着使用k8s来部署。
+
+课后小话:作业需要提交配置文件(compose和其他的如ginx的)，如果是公网部署的也可以把你的访问地址发给我，这一节开始的内容可能会有一些难，大家学习的话可以从"为什么","解决了什么问题","怎么解决的问题"这些角度来理解加深学习，课下不懂也可以多问我们，重在坚持。
 
 作业发送邮箱： **tantao@lanshan.email**
