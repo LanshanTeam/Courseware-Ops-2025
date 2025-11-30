@@ -226,7 +226,7 @@ services:
  ENV APP_PATH=/apps
  WORKDIR $APP_PATH
  COPY apps.jar $APP_PATH
- ENTRYPOINT ["java","--jar"]
+ ENTRYPOINT ["java","-jar"]
  CMD ["apps.jar"]
 ```
 
@@ -240,7 +240,7 @@ services:
       dockerfile: Dockerfile-alternate
       args:
         buildno: 1
-    command: ["java", "-jar", "test.jar"]
+    command: ["test.jar"]
 ```
 
 container_name 指令（不推荐使用）
