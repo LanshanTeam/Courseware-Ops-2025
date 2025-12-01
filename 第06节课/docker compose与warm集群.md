@@ -149,16 +149,16 @@ https://www.json2yaml.com/convert-yaml-to-JSON
 
 | docker compose 命令 | 说明 | 常见参数说明 |
 |-------------------|------|-------------|
-| docker compose stop | 停止容器 |
-| docker compose start | 启动容器 |
-| docker compose rm | 删除容器 |
-| docker compose restart | 重启容器 |
-| docker compose run | 运行一个临时容器 |
-| docker compose ps | 查看容器状态 |
+| docker compose stop | 停止容器 ||
+| docker compose start | 启动容器 ||
+| docker compose rm | 删除容器 ||
+| docker compose restart | 重启容器 ||
+| docker compose run | 运行一个临时容器 ||
+| docker compose ps | 查看容器状态 ||
 | docker compose up | 启动容器 | -d 后台运行容器 |
 | docker compose down | 停止容器 | -v 删除容器和卷 |
 | docker compose logs | 查看容器日志 | -f 跟随日志输出 |
-| docker compose exec | 进入容器 | -tt 启动交互式终端 |
+| docker compose exec | 进入容器 | -it 启动交互式终端 |
 | docker compose pull | 拉取镜像 |  |
 | docker compose build | 构建镜像 |  |
 | docker compose images | 列出镜像 |  |
@@ -243,7 +243,7 @@ services:
     command: ["java", "-jar", "test.jar"]
 ```
 
-container_name 指令（不推荐使用）
+# container_name 指令（不推荐使用）
 
 指定容器名称。默认将会使用项目名称服务名称序号这样的格式。
 
@@ -253,7 +253,7 @@ container_name: docker-web-container
 
 注意: 指定容器名称后, 该服务将无法进行扩展 (scale), 因为 Docker 不允许多个容器具有相同的名称。
 
-depends_on指令
+# depends_on 指令
 
 解决容器的依赖、启动先后的问题。以下例子中会先启动redis、db再启动web:
 
@@ -272,7 +272,7 @@ services:
 
 注意：在启动web服务时，并不会等待redis、db服务进入ready状态，而只是等到它们被启动状态(running状态)了。
 
-environment指令
+# environment指令
 
 设置环境变量，相当于 docker run -e。你可以使用数组或字典两种格式。
 
@@ -339,13 +339,13 @@ networks:  # 创建网络
   other-network:
 ```
 
-ports指令
+# ports指令
 
 指定宿主机和容器端口映射，或者仅仅指定容器的端口（宿主将会随机选择端口）都可以。
 
 注意：当使用 HOST:CONTAINER 格式来映射端口时，如果你使用的容器端口小于 60 并且没放到引号里，可能会得到错误结果，因为 YAML会自动解析xx:yy这种数字格式为 60 进制。为避免出现这种问题，建议数字串都采用引号包括起来的字符串格式。
 
-volumes指令
+# volumes指令
 
 用来指定宿主机目录和容器目录映射
 
@@ -360,7 +360,7 @@ volumes:  # 定义数据卷名称
   mysql_data:
 ```
 
-restart指令
+# restart指令
 
 指定容器退出后的重启策略为始终重启。该命令对保持服务始终运行十分有效。
 ```yaml
@@ -644,7 +644,7 @@ docker swarm join --token SWMTKN-1- 3edcx30eosroclc3hi4jmay8ngfqplf573jfsj6zf9a6
 docker swarm join --advertise-addr=IP  
 --token SWMTKN-1-3edcx30eosroclc3hi4jmay8ngfqplf573jfsj6zf9a663axmx-9kngyj7dxaov080ns17ymmpog \  
 192.168.201.145:2377
-```  
+```
 
 ```shell
 # 查看各个节点  
@@ -661,7 +661,7 @@ docker swarm leave [--force]
   
 #退出后需在manager节点删除退出的节点  
 docker node rm 退出节点的主机名
-```  
+```
 
 # 节点管理
 
@@ -675,7 +675,7 @@ docker node 1s
 docker node promote 主机名  
 # 降级为worker  
 docker node demote 主机名  
-```  
+```
 
 ## 节点下线
 
@@ -757,7 +757,7 @@ services:
         condition: on-failure           # none不重启，on-failure为容器故障时重启
         delay: 10s                      # 尝试重启的时间间隔（默认5s）
         max_attempts: 3                 # 最多的尝试次数（默认无限制）
-```  
+```
 
 # deploy 字段的主要配置
 
