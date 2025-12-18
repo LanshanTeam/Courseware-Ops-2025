@@ -384,128 +384,133 @@ async def update_item(item_id: int, item: Item, q: str | None = None):
 ### OAuth2与JWT集成（最常用）
 
 ```python
-from datetime import datetime, timedelta
-from typing import Optional
-from fastapi import Depends, FastAPI, HTTPException, status
+from datetime import datetime, timedelta, timezone
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 from pydantic import BaseModel
+import hashlib  # 使用Python内置库进行哈希
 
-# 配置常量
-SECRET_KEY = "your-secret-key-here-change-in-production"  # 实际应从环境变量读取
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# 1. 基础配置
+SECRET_KEY = "your-secret-key-here"
+TOKEN_EXPIRE_MINUTES = 1
 
-# 密码哈希
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# 2. 密码处理（使用简单的SHA256哈希演示安全存储）
+def hash_password(password: str) -> str:
+    """演示：安全存储时应存储哈希值，而非明文"""
+    return hashlib.sha256(password.encode()).hexdigest()
 
-# OAuth2方案
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# 模拟用户数据库
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "secret"
-        "disabled": False,
+# 3. 模拟用户数据库（密码已哈希）
+users_db = {
+    "testuser": {
+        "username": "testuser",
+        # 对应明文密码 "demo123"
+        "password_hash": hash_password("demo123")
     }
 }
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+# 4. 创建应用
+app = FastAPI(title="认证演示")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-class TokenData(BaseModel):
-    username: Optional[str] = None
-
-class User(BaseModel):
-    username: str
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
-
-class UserInDB(User):
-    hashed_password: str
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
-    if not user:
+# 5. 辅助函数
+def check_user(username: str, password: str) -> bool:
+    """验证用户名和密码"""
+    if username not in users_db:
         return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
+    # 比较哈希值
+    return users_db[username]["password_hash"] == hash_password(password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+def create_token(username: str) -> str:
+    """创建简易令牌（实际应用请使用JWT库）"""
+    expire_time = datetime.now(timezone.utc) + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
+    # 简易格式：用户名|过期时间戳
+    return f"{username}|{int(expire_time.timestamp())}"
 
-# 用户认证依赖项
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="无效的认证凭证",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def verify_token(token: str) -> str:
+    """验证令牌"""
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
+        username, expire_str = token.split("|")
+        expire_time = datetime.fromtimestamp(int(expire_str), timezone.utc)
+        
+        if datetime.now(timezone.utc) > expire_time:
+            return None  # 令牌过期
+            
+        if username not in users_db:
+            return None  # 用户不存在
+            
+        return username
+    except:
+        return None
 
-app = FastAPI()
+# 6. 依赖项：获取当前用户
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    if not username:
+        raise HTTPException(status_code=401, detail="无效或过期的令牌")
+    return username
 
-# 登录端点
-@app.post("/token", response_model=Token)
+# 7. API端点
+@app.get("/")
+async def home():
+    """首页：显示使用说明"""
+    return {
+        "message": "极简认证API演示",
+        "测试用户": "testuser",
+        "测试密码": "demo123",
+        "登录端点": "POST /login",
+        "获取信息": "GET /me (需要令牌)",
+        "公开数据": "GET /public",
+        "受保护数据": "GET /protected (需要令牌)"
+    }
+
+@app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="用户名或密码错误",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+    """登录获取令牌"""
+    if not check_user(form_data.username, form_data.password):
+        raise HTTPException(status_code=401, detail="用户名或密码错误")
+    
+    token = create_token(form_data.username)
+    return {"access_token": token, "token_type": "bearer"}
 
-@app.get("/users/me", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+@app.get("/me")
+async def read_current_user(current_user: str = Depends(get_current_user)):
+    """需要认证：获取当前用户信息"""
+    return {"username": current_user, "login_time": datetime.now().isoformat()}
 
-@app.get("/users/me/items/")
-async def read_own_items(current_user: User = Depends(get_current_user)):
-    return [{"item_id": 1, "owner": current_user.username}]
+@app.get("/protected")
+async def read_protected_data(current_user: str = Depends(get_current_user)):
+    """需要认证：访问受保护数据"""
+    return {
+        "message": "您已成功通过认证！",
+        "data": "这是敏感数据，只有认证用户可见",
+        "user": current_user
+    }
+
+@app.get("/public")
+async def read_public_data():
+    """公开数据：无需认证"""
+    return {"message": "这是公开数据，所有人可见"}
 ```
+### 测试
+下面的IP地址需要修改为你服务运行的地址
 
+```bash
+curl -X GET http://192.168.2.1:8000/public
+```
+带正确认证
+```bash
+curl -X POST http://192.168.2.1:8000/login \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=testuser&password=demo123"
+```
+验证
+```bash
+curl -X GET http://192.168.2.1:8000/me \
+  -H "Authorization: Bearer [令牌]"
+
+curl -X GET http://192.168.2.1:8000/protected \
+  -H "Authorization: Bearer [令牌]"
+```
 ## 连接数据库
 
 在前面**mysql**的课程里有提到**sqlalchemy**  
@@ -517,37 +522,30 @@ async def read_own_items(current_user: User = Depends(get_current_user)):
 ### 创建数据库模型
 得益于sqlalchemy，我们可以不用写sql语句，下面是一个简单的
 ```python
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
+# 数据库模型定义
 Base = declarative_base()
 
-## 定义一个users的表
 class User(Base):
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
-```
 
-### 连接数据库
-```python
-DATABASE_URL = "sqlite:///./test.db"  # 可替换为其他数据库连接字符串
-
-engine = create_engine(DATABASE_URL)
+# 数据库连接配置
+DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # 创建数据库表
 Base.metadata.create_all(bind=engine)
-```  
 
-### 依赖注入
-```python
-from fastapi import Depends, FastAPI
-from sqlalchemy.orm import Session
-
+# FastAPI应用实例
 app = FastAPI()
 
 # 依赖项：获取数据库会话
@@ -557,13 +555,20 @@ def get_db():
         yield db
     finally:
         db.close()
-```
-### 数据库操作
-```python
-from fastapi import HTTPException
 
+# 路由和视图函数
 @app.post("/users/")
 def create_user(username: str, email: str, db: Session = Depends(get_db)):
+    # 检查用户名是否已存在
+    existing_user = db.query(User).filter(User.username == username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    # 检查邮箱是否已存在
+    existing_email = db.query(User).filter(User.email == email).first()
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
     db_user = User(username=username, email=email)
     db.add(db_user)
     db.commit()
@@ -576,58 +581,37 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
-```
 
+@app.get("/users/")
+def read_all_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return users
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db.delete(db_user)
+    db.commit()
+    return {"message": "User deleted successfully"}
+
+# 根路由
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI SQLAlchemy Demo"}
+
+# 启动应用的代码（仅用于直接运行）
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
 
 ## 中间件
 在FastAPI中，中间件是非常有用的组成部分，可以处理请求和响应的生命周期中的各种操作。  
 中间件是一个函数，它用于在请求到达路由处理程序之前或响应返回到客户端之前进行处理。  
 通过中间件，你可以实现请求日志记录、跨域请求处理、身份验证、性能监控等功能。
-
-一个简单的演示
-### 定义和使用中间件  
-```python
-import time
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-# 添加CORS中间件
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # 允许的前端地址
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# 自定义请求日志中间件
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    
-    # 处理请求
-    response = await call_next(request)
-    
-    # 记录日志
-    process_time = time.time() - start_time
-    print(f"{request.method} {request.url.path} - {response.status_code}")
-    print(f"处理时间: {process_time:.3f}秒")
-    
-    # 添加自定义响应头
-    response.headers["X-Process-Time"] = str(process_time)
-    
-    return response
-
-@app.get("/")
-async def read_root():
-    return {"message": "Hello, World!"}
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    return {"item_id": item_id}
-```  
 
 添加多个中间件的执行过程
 ```txt
