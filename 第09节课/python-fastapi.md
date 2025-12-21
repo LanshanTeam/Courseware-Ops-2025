@@ -34,7 +34,7 @@ def breakfast_sync():
     print("🍽️ 早餐完成！")
 
 # 总耗时：3 + 2 = 5秒
-```  
+```
 
 - 异步函数  
   
@@ -63,7 +63,7 @@ async def breakfast_async():
     print("🍽️ 早餐完成！")
 
 # 总耗时：最长任务的时间 ≈ 3秒~
-   ```
+```
 上面是一个简单的示例，在处理**io**(input&output)密集型的代码时，异步的效率会高很多，比如现在有一个需要爬取100次的程序，就可以使用异步来爬取，效率完全不能比  
 
 而fastapi就天生支持异步，写代码就可以用异步函数来提高程序的效率    
@@ -82,7 +82,7 @@ async def breakfast_async():
   "年龄": 25,
   "学生": true
 }
-``` 
+```
 
 数据类型有
 ```  
@@ -100,6 +100,7 @@ pip install fastapi
 ```
 你还需要一个ASGI服务器  
 因为fastapi是基于ASGI的
+
 ```bash
 pip install uvicorn
 ```
@@ -170,7 +171,7 @@ async def root():
 当访问这个路由时函数会执行   
 返回的数据需要是**json**格式 在fastapi有工具会自动对数据处理
 
-## 注释
+
 
 ## 声名路径参数
 
@@ -224,10 +225,11 @@ def read_file(file_path: str):
 ```
 这里的使用场景是你的传参的参数里可能含有"/"时
 一个例子
+
 ```txt
 GET /files/home/user/file.txt
 返回: {"file_path": "home/user/file.txt"}
- ```
+```
 
 ### 查询参数
 
@@ -332,6 +334,7 @@ def create_item(item: Item):   ## 作为一个查询参数
 
 可以在**http://localhost:8000/docs**里查看  
 还有一些其他的方法来测试
+
 - 使用**request**库，定义好**data**参数
 - 接口测试工具 如 apipost
 - curl
@@ -391,7 +394,6 @@ from pydantic import BaseModel
 import hashlib  # 使用Python内置库进行哈希
 
 # 1. 基础配置
-SECRET_KEY = "your-secret-key-here"
 TOKEN_EXPIRE_MINUTES = 1
 
 # 2. 密码处理（使用简单的SHA256哈希演示安全存储）
@@ -520,7 +522,7 @@ curl -X GET http://192.168.2.1:8000/protected \
 在python里有一个原生得sqlite数据库，这里我使用这个做演示，当然你也可以使用其他的  
 
 ### 创建数据库模型
-得益于sqlalchemy，我们可以不用写sql语句，下面是一个简单的
+得益于sqlalchemy，我们可以不用写sql语句，下面是一个简单的案例
 ```python
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import Column, Integer, String, create_engine
@@ -617,7 +619,7 @@ if __name__ == "__main__":
 ```txt
 请求 → 中间件1 → 中间件2 → ... → 路由处理 → ... → 中间件2 → 中间件1 → 响应
 ```
-  
+
 ## 作业安排
 作业大家就看自己情况了，最好把上面的都敲一遍，跑一边试一试，感受一下  
 那么问题来了，大家的python学的怎么样呢，这里的开发还是很需要python的基础  
@@ -625,7 +627,6 @@ if __name__ == "__main__":
 web其实也算一点后端开发了，里面还有很多的东西比如鉴权，数据库，中间件...大家对开发感兴趣的可以看看蓝山java和go组(他们超厉害的)  
 
 如果你跟的上这些，那么之后就可以参加一些比赛，写一些项目了
-
 
 [推荐视频](https://www.bilibili.com/video/BV1zV2QBtE39/) 
 
